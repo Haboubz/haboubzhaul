@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { auth } from "./firebaseConfig";  // ✅ Import Firebase config
+import { auth } from "../firebaseConfig";  // ✅ Corrected import path
 import { signInWithPopup, GoogleAuthProvider, getIdToken } from "firebase/auth";
 
 const provider = new GoogleAuthProvider();
