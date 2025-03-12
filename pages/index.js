@@ -1,48 +1,43 @@
-import { useState } from "react";
-import { auth } from "../firebaseConfig";  // ✅ Corrected import path
-import { signInWithPopup, GoogleAuthProvider, getIdToken } from "firebase/auth";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/router";
+import { auth, db } from "../firebaseConfig";
+import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { collection, getDocs, setDoc, doc } from "firebase/firestore";
 
-const provider = new GoogleAuthProvider();
-
-const HomePage = () => {
+const Index = () => {
+  const router = useRouter();
   const [username, setUsername] = useState("");
 
-  const handleSubmit = async () => {
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        router.push("/dashboard"); // Redirect logged-in users to the dashboard
+      }
+    });
+    return () => unsubscribe();
+  }, [router]);
+
+  const handleSignIn = async () => {
     try {
-      // Authenticate user with Google Sign-In
+      const provider = new GoogleAuthProvider();
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-      const token = await getIdToken(user);
 
-      console.log("User Token:", token);
+      // Store the username in Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        username: username,
+        email: user.email,
+        entries: 1,
+      });
 
-      // Send request to Firebase Function
-      const response = await fetch(
-        "https://us-central1-haboubzhaul.cloudfunctions.net/incrementEntry",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-          },
-          body: JSON.stringify({ username: username, userEmail: user.email }),
-        }
-      );
-
-      const data = await response.json();
-      if (data.success) {
-        alert("Entry submitted successfully!");
-      } else {
-        alert(`Error: ${data.error}`);
-      }
+      router.push("/dashboard"); // Redirect to dashboard
     } catch (error) {
-      console.error("Authentication error", error);
-      alert("Failed to authenticate. Please try again.");
+      console.error("Sign-in error:", error);
     }
   };
 
   return (
-    <div style={{ textAlign: "center", marginTop: "100px" }}>
+    <div style={{ textAlign: "center", padding: "50px", color: "yellow" }}>
       <h1>Welcome to Haboubz Haul!</h1>
       <p>Enter your OSRS username to get started.</p>
       <input
@@ -50,10 +45,18 @@ const HomePage = () => {
         placeholder="Enter Username"
         value={username}
         onChange={(e) => setUsername(e.target.value)}
+        style={{ padding: "10px", marginBottom: "10px" }}
       />
-      <button onClick={handleSubmit}>Continue</button>
+      <br />
+      <button onClick={handleSignIn} style={{ padding: "10px", background: "yellow", fontWeight: "bold" }}>
+        Join In!
+      </button>
+      <br />
+      <button onClick={() => router.push("/leaderboard")} style={{ marginTop: "10px", padding: "10px", background: "gray" }}>
+        View Leaderboard
+      </button>
     </div>
   );
 };
 
-export default HomePage;
+export default Index;

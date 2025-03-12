@@ -1,36 +1,52 @@
 import { useEffect, useState } from "react";
-import { db } from "../lib/firebase";
+import { db } from "../firebaseConfig";
 import { collection, getDocs } from "firebase/firestore";
+import { useRouter } from "next/router";
 
-export default function Leaderboard() {
-  const [users, setUsers] = useState([]);
+const Leaderboard = () => {
+  const [entries, setEntries] = useState([]);
+  const router = useRouter();
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      const querySnapshot = await getDocs(collection(db, "Users"));
-      const usersList = querySnapshot.docs.map(doc => ({
+    const fetchEntries = async () => {
+      const querySnapshot = await getDocs(collection(db, "users"));
+      const entriesList = querySnapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       }));
-
-      // Sort by highest entries
-      usersList.sort((a, b) => b.entries - a.entries);
-      setUsers(usersList);
+      entriesList.sort((a, b) => b.entries - a.entries);
+      setEntries(entriesList);
     };
-
-    fetchUsers();
+    fetchEntries();
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <h1 className="text-3xl font-bold mb-4">Leaderboard</h1>
-      <ul className="w-1/2 bg-white shadow-md rounded p-4">
-        {users.map((user, index) => (
-          <li key={user.id} className="border-b p-2">
-            {index + 1}. {user.username} - {user.entries} Entries
-          </li>
-        ))}
-      </ul>
+    <div style={{ textAlign: "center", padding: "50px", color: "yellow" }}>
+      <h1>Leaderboard</h1>
+      <table style={{ margin: "auto", border: "1px solid yellow", padding: "10px" }}>
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Username</th>
+            <th>Entries</th>
+          </tr>
+        </thead>
+        <tbody>
+          {entries.map((entry, index) => (
+            <tr key={entry.id}>
+              <td>{index + 1}</td>
+              <td>{entry.username}</td>
+              <td>{entry.entries}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <br />
+      <button onClick={() => router.push("/")} style={{ padding: "10px", background: "yellow", fontWeight: "bold" }}>
+        Back to Home
+      </button>
     </div>
   );
-}
+};
+
+export default Leaderboard;
