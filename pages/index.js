@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { auth, db } from "../firebaseConfig";
 import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { setDoc, doc } from "firebase/firestore";
+import { setDoc, getDoc, doc } from "firebase/firestore";
 
 const Index = () => {
   const router = useRouter();
@@ -11,7 +11,7 @@ const Index = () => {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        router.push("/dashboard"); // Redirect logged-in users to the dashboard
+        router.push("/dashboard");
       }
     });
     return () => unsubscribe();
@@ -23,14 +23,25 @@ const Index = () => {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
 
-      // Store the username in Firestore
-      await setDoc(doc(db, "users", user.uid), {
-        username: username,
-        email: user.email,
-        entries: 1,
-      });
+      if (!username) {
+        alert("Please enter your OSRS username before signing in.");
+        return;
+      }
 
-      router.push("/dashboard"); // Redirect to dashboard
+      // Check if user already exists in Firestore
+      const userRef = doc(db, "users", user.uid);
+      const docSnap = await getDoc(userRef);
+
+      if (!docSnap.exists()) {
+        // Save OSRS username to Firestore
+        await setDoc(userRef, {
+          osrsUsername: username,
+          email: user.email,
+          entries: 1,
+        });
+      }
+
+      router.push("/dashboard");
     } catch (error) {
       console.error("Sign-in error:", error);
     }
@@ -42,7 +53,7 @@ const Index = () => {
       <p>Enter your OSRS username to get started.</p>
       <input
         type="text"
-        placeholder="Enter Username"
+        placeholder="Enter OSRS Username"
         value={username}
         onChange={(e) => setUsername(e.target.value)}
         style={{ padding: "10px", marginBottom: "10px" }}

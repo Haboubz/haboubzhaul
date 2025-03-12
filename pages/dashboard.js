@@ -1,26 +1,31 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { auth, db } from "../firebaseConfig";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { getDoc, doc } from "firebase/firestore";
 
 const Dashboard = () => {
   const router = useRouter();
   const [user, setUser] = useState(null);
-  const [username, setUsername] = useState("");
+  const [osrsUsername, setOsrsUsername] = useState("");
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      if (currentUser) {
-        setUser(currentUser);
-        const userDoc = await getDoc(doc(db, "users", currentUser.uid));
-        if (userDoc.exists()) {
-          setUsername(userDoc.data().username);
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        setUser(user);
+
+        // Fetch OSRS username from Firestore
+        const userRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(userRef);
+
+        if (docSnap.exists()) {
+          setOsrsUsername(docSnap.data().osrsUsername || "Unknown");
         }
       } else {
         router.push("/");
       }
     });
+
     return () => unsubscribe();
   }, [router]);
 
@@ -32,22 +37,5 @@ const Dashboard = () => {
   return (
     <div style={{ textAlign: "center", padding: "50px", color: "yellow" }}>
       <h1>Dashboard</h1>
-      {user ? (
-        <>
-          <p>Logged in as: {username || user.displayName}</p>
-          <button onClick={() => router.push("/leaderboard")} style={{ padding: "10px", background: "gray" }}>
-            View Leaderboard
-          </button>
-          <br />
-          <button onClick={handleSignOut} style={{ marginTop: "10px", padding: "10px", background: "red", color: "white" }}>
-            Sign Out
-          </button>
-        </>
-      ) : (
-        <p>Loading...</p>
-      )}
-    </div>
-  );
-};
-
-export default Dashboard;
+      {user ? <p>Logged in as: {osrsUsername}</p> : <p>Loading...</p>}
+      <button onClick={() => router.push("/leaderboa
