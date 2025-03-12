@@ -2,17 +2,16 @@ import { initializeApp, getApps, getApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
-// Ensure environment variables are loaded correctly
 const firebaseConfig = {
-  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
+  apiKey: "YOUR_FIREBASE_API_KEY",
+  authDomain: "haboubzhaul.firebaseapp.com",
+  projectId: "haboubzhaul",
+  storageBucket: "haboubzhaul.firebasestorage.app",  // Use exactly what Firebase provides
+  messagingSenderId: "665091740041",
+  appId: "1:665091740041:web:c0f471cd9b0e7cce591158"
 };
 
-// Ensure Firebase initializes only once
+// Initialize Firebase
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
 const auth = getAuth(app);
 const db = getFirestore(app);

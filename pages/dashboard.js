@@ -1,56 +1,35 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { auth, db } from "../firebaseConfig";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { getDoc, doc } from "firebase/firestore";
+import { getAuth, signOut } from "firebase/auth";
+import { db } from "../firebaseConfig";
+import { doc, getDoc } from "firebase/firestore";
 
-const Dashboard = () => {
+export default function Dashboard() {
+  const [username, setUsername] = useState("");
   const router = useRouter();
-  const [user, setUser] = useState(null);
-  const [osrsUsername, setOsrsUsername] = useState("");
+  const auth = getAuth();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    const fetchUsername = async () => {
+      const user = auth.currentUser;
       if (user) {
-        setUser(user);
-
-        // Fetch OSRS username from Firestore
-        const userRef = doc(db, "users", user.uid);
-        const docSnap = await getDoc(userRef);
-
+        const docRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          setOsrsUsername(docSnap.data().osrsUsername || "Unknown");
+          setUsername(docSnap.data().username);
         }
-      } else {
-        router.push("/");
       }
-    });
+    };
 
-    return () => unsubscribe();
-  }, [router]);
-
-  const handleSignOut = async () => {
-    await signOut(auth);
-    router.push("/");
-  };
+    fetchUsername();
+  }, []);
 
   return (
-    <div style={{ textAlign: "center", padding: "50px", color: "yellow" }}>
-      <h1 style={{ fontSize: "32px", fontWeight: "bold" }}>Dashboard</h1>
-      {user ? <p>Logged in as: {osrsUsername}</p> : <p>Loading...</p>}
-      <button 
-        onClick={() => router.push("/leaderboard")} 
-        style={{ marginTop: "10px", padding: "10px", background: "gray", color: "white", border: "none", cursor: "pointer" }}>
-        View Leaderboard
-      </button>
-      <br />
-      <button 
-        onClick={handleSignOut} 
-        style={{ marginTop: "10px", padding: "10px", background: "red", color: "white", fontWeight: "bold", border: "none", cursor: "pointer" }}>
-        Sign Out
-      </button>
+    <div style={{ textAlign: "center", color: "yellow", backgroundColor: "black", height: "100vh" }}>
+      <h1>Dashboard</h1>
+      <p>Logged in as: <strong>{username || "Loading..."}</strong></p>
+      <button onClick={() => router.push("/leaderboard")} style={{ padding: "10px", background: "gray" }}>View Leaderboard</button>
+      <button onClick={() => signOut(auth)} style={{ padding: "10px", background: "red", color: "white", marginLeft: "10px" }}>Sign Out</button>
     </div>
   );
-};
-
-export default Dashboard;
+}
