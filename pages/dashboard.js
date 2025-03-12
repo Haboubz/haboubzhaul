@@ -36,6 +36,21 @@ const Dashboard = () => {
 
   return (
     <div style={{ textAlign: "center", padding: "50px", color: "yellow" }}>
-      <h1>Dashboard</h1>
+      <h1 style={{ fontSize: "32px", fontWeight: "bold" }}>Dashboard</h1>
       {user ? <p>Logged in as: {osrsUsername}</p> : <p>Loading...</p>}
-      <button onClick={() => router.push("/leaderboa
+      <button 
+        onClick={() => router.push("/leaderboard")} 
+        style={{ marginTop: "10px", padding: "10px", background: "gray", color: "white", border: "none", cursor: "pointer" }}>
+        View Leaderboard
+      </button>
+      <br />
+      <button 
+        onClick={handleSignOut} 
+        style={{ marginTop: "10px", padding: "10px", background: "red", color: "white", fontWeight: "bold", border: "none", cursor: "pointer" }}>
+        Sign Out
+      </button>
+    </div>
+  );
+};
+
+export default Dashboard;
