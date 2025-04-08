@@ -1,8 +1,10 @@
 body {
     background-color: black;
-    color: yellow;
+    color: gold;
     font-family: Arial, sans-serif;
     text-align: center;
+    margin: 0;
+    padding: 0;
 }
 
 .container {
@@ -15,17 +17,23 @@ body {
 }
 
 .logo {
-    width: 150px;
+    width: 120px;
     height: auto;
     margin-bottom: 20px;
+}
+
+h1, h2 {
+    color: gold;
+    font-size: 2em;
+    font-weight: bold;
 }
 
 input {
     padding: 10px;
     margin: 10px;
-    border: 2px solid yellow;
+    border: 2px solid gold;
     background: black;
-    color: yellow;
+    color: gold;
     font-size: 16px;
     text-align: center;
 }
@@ -33,14 +41,33 @@ input {
 button {
     padding: 10px 20px;
     margin: 10px;
-    background-color: yellow;
+    background: linear-gradient(45deg, #ffcc00, #d4af37);
     color: black;
     border: none;
     font-size: 16px;
     cursor: pointer;
+    font-weight: bold;
 }
 
 button:hover {
-    background-color: orange;
+    background: linear-gradient(45deg, #d4af37, #ffcc00);
 }
 
+/* Leaderboard Table */
+table {
+    width: 80%;
+    margin: 20px auto;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 10px;
+    border: 2px solid gold;
+    text-align: center;
+}
+
+th {
+    background: linear-gradient(45deg, #ffcc00, #d4af37);
+    color: black;
+    font-weight: bold;
+}
